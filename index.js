@@ -271,13 +271,14 @@ RedisClient.prototype.on_ready = function () {
         this.send_command('select', [this.selected_db]);
     }
     if (this.pub_sub_mode === true) {
-        Object.keys(this.subscription_set).forEach(function (key) {
+        var keys = Object.keys(this.subscription_set);
+        for (var i = 0, key; key = keys[i]; i++) {
             var parts = key.split(" ");
             if (exports.debug_mode) {
                 console.warn("sending pub/sub on_ready " + parts[0] + ", " + parts[1]);
             }
             self.send_command(parts[0], [parts[1]]);
-        });
+        }
     } else if (this.monitoring) {
         this.send_command("monitor");
     } else {

@@ -950,15 +950,26 @@ Multi.prototype.exec = function (callback) {
                 args.push(obj[key]);
             });
         }
+        var cur = self.queue[index];
         this.client.send_command(command, args, function (err, reply) {
             if (err) {
-                var cur = self.queue[index];
                 if (typeof cur[cur.length - 1] === "function") {
                     cur[cur.length - 1](err);
                 } else {
-                    throw new Error(err);
+                    if (callback) {
+                      callback(new Error(err));
+                    } else {
+                      self.client.emit("error", new Error(err));
+                    }
                 }
-                self.queue.splice(index, 1);
+                // self.queue.splice(index, 1);
+                 var new_index = self.queue.indexOf(cur);
+                 if (new_index !== -1) {
+                     self.queue.splice(new_index, 1);
+                     console.log('spliced', new_index, cur);
+                 } else {
+                     throw new Error("queue item no longer found");
+                 }
             }
         });
     }, this);
